@@ -1,5 +1,7 @@
 # SpringBoot-study
 
+Inflearn : 스프링부트 개념정리(이론)
+
 ## Spring이란
 1. Spring은 FrameWork이다.
 > 1. 틀(Frame)에서 동작(Work)한다
