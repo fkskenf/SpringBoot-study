@@ -56,7 +56,7 @@ public void use(){
 >> 8bit씩 끊어 읽어. => 1 Byte (통신단위)<br></br>
 >> 언어별 통신을 위해 유니코드 (3byte 통신) 사용
 > 3. 통신 : Byte Stream -> InputStreamReader (문자 하나로 읽어줌/ 배열) 
->> 배열의 크기를 정해야하기에 낭비가 있음
+>> 배열의 크기를 정해야하기에 낭비가 있음,
 >> 그리하여 BufferReader(가변길이의 문자를 받을 수 있음)사용
 > 4. BufferWriter 보다 PrintWriter 많이 사용
 9. Spring은 계속 발전중이다.
