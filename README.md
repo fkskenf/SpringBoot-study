@@ -109,3 +109,9 @@ bootJar {
 >> 2. 다른 타입을 파라미터로 필요로 하는 경우에는 ApplicationRunner를 사용 <br>
 >> Runner를 구현하게 하고, 빈으로 등록하면 callRunner에서는 CommandLineRunner과 ApplicationRunner 구현체들을 찾아서 run 메소드를 호출 <br>
 
+# 4. 애플리케이션 컨텍스트(ApplicationContext)의 refreshContext 동작 과정
+> 1. refreshContext 동작 과정 
+>> 먼저 ShutdownHook을 등록 : ShutdownHook이란 프로그램의 종료를 감지하여 프로그램 종료 시에 후처리 작업을 진행하는 기술 <br>
+>> 프로그램이 실행되다가 프로세스가 죽어버리면 연결 종료, 자원 반납 등의 처리를 못하게 되는데, ShutdownHook을 사용함으로써 프로그램이 종료되어도 별도의 쓰레드가 올바른 프로그램 종료(Graceful Shutdown)를 위한 작업을 처리할 수 있다. <br>
+>> 
+
