@@ -133,8 +133,25 @@ bootJar {
 >> 9. 빈들의 인스턴스화 및 후처리 <br>
 >> 10. refresh 마무리 단계 <br>
 >> : 애플리케이션 컨텍스트를 준비하기 위해 사용되었던 resourceCache를 제거하고, Lifecycle Processor를 초기화하여 refresh를 전파하고, 최종 이벤트를 전파하며 마무리된다. <br>
->> Lifecycle Processor에는 웹서버와 관련된 부분이 있어서 refresh가 전파되면, 웹서버가 실행된다
+>> Lifecycle Processor에는 웹서버와 관련된 부분이 있어서 refresh가 전파되면, 웹서버가 실행된다 <br>
 >> 추가) refreshContext가 실패한 경우 마무리 단계 <br>
+
+# 5. DispatcherServlet(디스패처 서블릿) 동작 과정
+> 1. 디스패처 서블릿은 모든 요청을 가장 먼저 받는 프론트 컨트롤러
+>> 1. 서블리 요청/응답을 HTTP 서블릿 요청/응답으로 변환
+>> : Servlet 관련 Request/Response 객체를 Http 관련 Request/Response로 캐스팅
+>> 2. Http Method에 따른 처리 작업 진행
+>> 3. 요청에 대한 공통 처리 작업 진행
+>> 4. 컨트롤러로 요청을 위임
+>>> 1. 요청에 패핑되는 HandlerMapping (HandlerExecutionChain) 조회 <br>
+>>> :HandlerMethod에는 매핑되는 컨트롤러의 메소드와 컨트롤러 빈 이름(또는 컨트롤러 빈) 및 빈 팩토리 등이 저장
+>>> 2. 요청을 처리할 HandlerAdapter 조회 <br>
+>>> 3. HandlerAdapter를 통해 컨트롤러 메소드 호출(HandlerExecutionChain 처리) <br>
+>>> : 컨트롤러 메소드 호출 전에는 적합한 파라미터를 만들어 넣어주어야 하며(ArgumentResolver), 호출 후에는 메세지 컨버터를 통해 ResponseEntity의 Body를 찾아 Json 직렬화하는 등(ReturnValueHandler)이 필요
+> 2. DispatcherServlet(디스패처 서블릿)의 초기화 과정
+>> 1. 초기화: 요청이 들어오면 서블릿이 웹 컨테이너에 등록되어 있는지 확인하고, 없으면 초기화를 진행함 <br>
+>> 2. 요청 처리: 요청이 들어오면 각각의 HTTP 메소드에 맞게 요청을 처리함 <br>
+>> 3. 소멸: 웹 컨테이너가 서블릿에 종료 요청을 하여 종료 시에 처리해야하는 작업들을 처리함 <br>
 
 
 
