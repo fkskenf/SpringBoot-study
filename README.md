@@ -110,8 +110,31 @@ bootJar {
 >> Runner를 구현하게 하고, 빈으로 등록하면 callRunner에서는 CommandLineRunner과 ApplicationRunner 구현체들을 찾아서 run 메소드를 호출 <br>
 
 # 4. 애플리케이션 컨텍스트(ApplicationContext)의 refreshContext 동작 과정
-> 1. refreshContext 동작 과정 
+> - refreshContext 동작 과정 
 >> 먼저 ShutdownHook을 등록 : ShutdownHook이란 프로그램의 종료를 감지하여 프로그램 종료 시에 후처리 작업을 진행하는 기술 <br>
 >> 프로그램이 실행되다가 프로세스가 죽어버리면 연결 종료, 자원 반납 등의 처리를 못하게 되는데, ShutdownHook을 사용함으로써 프로그램이 종료되어도 별도의 쓰레드가 올바른 프로그램 종료(Graceful Shutdown)를 위한 작업을 처리할 수 있다. <br>
->> 
+
+> - refresh는 start-up 메소드로써 싱글톤 빈으로 등록할 클래스들을 찾아서 생성하고 후처리하는 단계 <br>
+>> 1. refresh 준비 단계 : 애플리케이션 컨텍스트의 상태를 active로 변경하는 등의 준비 작업<br>
+>> : 빈 팩토리에서 빈을 꺼내는 작업은 active 상태가 true 일때만 가능
+>> 2. BeanFactory 준비 단계 <br>
+>> : beanFactory가 동작하기 위한 준비 작업들이 진행
+>> 3. BeanFactory의 후처리 진행 <br>
+>> 4. BeanFactoryPostProcessor 실행 <br>
+>> : 빈을 탐색하는 것처럼 빈 팩토리가 준비된 후에 해야하는 후처리기들을 실행 (싱글톤 객체로 인스턴스화할 빈을 탐색 등등...) <br>
+>> : BeanFactory가 준비되고 빈을 인스턴스화하기 전의 중간 단계로써 빈의 목록을 불러오고, 불러온 빈의 메타 정보를 조작하기 위한 BeanFactoryPostProcessor를 객체로 만들어 실행
+>> 5. BeanPostProcessor 등록 <br>
+>> : 빈들이 생성되고 나서 빈의 내용이나 빈 자체를 변경하기 위한 빈 후처리기인 BeanPostProcessor를 등록
+>> 6. MessageSource 및 Event Multicaster 초기화 <br>
+>> : 다국어 처리를 위한 MessageSource와 ApplicationListener에 event를 publish하기 위한 Event Multicaster를 초기화하고 있다.
+>> 7. onRefresh(웹 서버 생성 및 실행) <br>
+>> 8. ApplicationListener 조회 및 등록 <br>
+>> : ApplicationListener의 구현체들을 찾아서 EventMultiCaster에 등록
+>> 9. 빈들의 인스턴스화 및 후처리 <br>
+>> 10. refresh 마무리 단계 <br>
+>> : 애플리케이션 컨텍스트를 준비하기 위해 사용되었던 resourceCache를 제거하고, Lifecycle Processor를 초기화하여 refresh를 전파하고, 최종 이벤트를 전파하며 마무리된다. <br>
+>> Lifecycle Processor에는 웹서버와 관련된 부분이 있어서 refresh가 전파되면, 웹서버가 실행된다
+>> 추가) refreshContext가 실패한 경우 마무리 단계 <br>
+
+
 
