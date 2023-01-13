@@ -2,7 +2,7 @@
 > Project : [Spring-boot-demo](https://github.com/fkskenf/spring-boot-demo)
 
 # Catalog
-> 1. Project Setting
+> 1. Create Project
 > 2. JPA Setting
 
 <br>
