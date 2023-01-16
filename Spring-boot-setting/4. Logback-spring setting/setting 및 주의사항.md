@@ -16,6 +16,8 @@
 >> 2번방식으로 적용 : 이유는 로그파일의 위치는 개발기/운영기 모두 동일한 위치에 동일한 이름으로 떨구는 방식이 많다고 판단 <br>
 >> 환경별 파일위치,이름 변경이 필요한 경우 <springProfile> 속에 Hardcording해서 반영 가능
 
+![image](https://user-images.githubusercontent.com/60438691/212631034-7218fe62-8ace-421b-ba3a-f167ec375265.png)
+
 ### application.yml
 ```yml
 spring:
