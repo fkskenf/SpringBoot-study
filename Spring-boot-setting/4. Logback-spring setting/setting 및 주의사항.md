@@ -1,0 +1,167 @@
+## 적용 및 주의사항
+* logback-spring.xml에 <property name :...> 적용시 null이 나오는 이슈
+> 원인
+>> logback-spring.xml이 application.yml보다 먼저 실행되기 때문 
+  
+<br>
+  
+> 해결방안
+>> 1. 전체설정으로 LOG_PATH, LOG_FILE_NAME을 Hardcoding (테스트성공)
+>> 2. < springProfile >를 활용하여, 환경별 LOG_PATH, LOG_FILE_NAME을 Hardcoding (테스트성공)
+>> 3. application.yml 대신 application.property를 적용???.(테스트필요)
+  
+<br>
+  
+> 결과
+>> 2번방식으로 적용 : 이유는 로그파일의 위치는 개발기/운영기 모두 동일한 위치에 동일한 이름으로 떨구는 방식이 많다고 판단 <br>
+>> 환경별 파일위치,이름 변경이 필요한 경우 <springProfile> 속에 Hardcording해서 반영 가능
+
+### application.yml
+```yml
+spring:
+  datasource: # DB 접속정보
+    url: jdbc:mysql://127.0.0.1:3306/sys?serverTimezone=UTC&autoReconnect=true&useSSL=false
+    username: root
+    password: ses8178@
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    database: mysql
+    show-sql: true # Query view
+    open-in-view: false
+    hibernate: # JPS 구현체
+      ddl-auto: validate # Only Entity & Table Mapping Check
+    properties:
+      hibernate:
+        format_sql: true # Query 가독성
+        show_sql: true # Query System.out Print (지양)
+logging:
+  level:
+    org:
+      apache:
+        coyote:
+          http11: debug
+
+      hiberante:
+        SQL: debug # Query Logger Print (지향)
+        type:
+          descriptor:
+            sql: trace
+---
+
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: ss
+
+  
+```
+### logback-spring.xml
+```xml
+    <?xml version="1.0" encoding="UTF-8"?>
+<!-- 60초마다 설정 파일의 변경을 확인 하여 변경시 갱신 -->
+<configuration scan="true" scanPeriod="60 seconds">
+    <!--Environment 내의 프로퍼티들을 개별적으로 설정할 수도 있다.-->
+    <springProperty scope="context" name="LOG_LEVEL" source="logging.level.root"/>
+
+    <springProfile name="dev">
+    <!-- log file path -->
+    <property name="LOG_PATH" value="/Users/jang/Downloads"/>
+    <!-- log file name -->
+    <property name="LOG_FILE_NAME" value="dev"/>
+    <!-- err log file name -->
+
+    <property name="ERR_LOG_FILE_NAME" value="err_log"/>
+    <!-- pattern -->
+    <property name="LOG_PATTERN" value="%-5level %d{yy-MM-dd HH:mm:ss}[%thread] [%logger{0}:%line] - %msg%n"/>
+    </springProfile>
+
+    <springProfile name="ss">
+        <!-- log file path -->
+        <property name="LOG_PATH" value="/Users/jang/Downloads"/>
+        <!-- log file name -->
+        <property name="LOG_FILE_NAME" value="ss"/>
+        <!-- err log file name -->
+        <property name="ERR_LOG_FILE_NAME" value="err_log"/>
+        <!-- pattern -->
+        <property name="LOG_PATTERN" value="%-5level %d{yy-MM-dd HH:mm:ss}[%thread] [%logger{0}:%line] - %msg%n"/>
+    </springProfile>
+
+
+    <!-- Console Appender -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- File Appender -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 파일경로 설정 -->
+        <file>${LOG_PATH}/${LOG_FILE_NAME}.log</file>
+
+        <!-- 출력패턴 설정-->
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+
+        <!-- Rolling 정책 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- .gz,.zip 등을 넣으면 자동 일자별 로그파일 압축 -->
+            <fileNamePattern>${LOG_PATH}/${LOG_FILE_NAME}.%d{yyyy-MM-dd}_%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <!-- 파일당 최고 용량 kb, mb, gb -->
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <!-- 일자별 로그파일 최대 보관주기(~일), 해당 설정일 이상된 파일은 자동으로 제거-->
+            <maxHistory>30</maxHistory>
+            <!--<MinIndex>1</MinIndex>
+            <MaxIndex>10</MaxIndex>-->
+        </rollingPolicy>
+    </appender>
+
+    <!-- 에러의 경우 파일에 로그 처리 (필터 사용 예제)-->
+    <appender name="Error" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>error</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <file>${LOG_PATH}/${ERR_LOG_FILE_NAME}.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+        <!-- Rolling 정책 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- .gz,.zip 등을 넣으면 자동 일자별 로그파일 압축 -->
+            <fileNamePattern>${LOG_PATH}/${ERR_LOG_FILE_NAME}.%d{yyyy-MM-dd}_%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <!-- 파일당 최고 용량 kb, mb, gb -->
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <!-- 일자별 로그파일 최대 보관주기(~일), 해당 설정일 이상된 파일은 자동으로 제거-->
+            <maxHistory>60</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <!-- root레벨 설정 -->
+    <root level="${LOG_LEVEL}">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="Error"/>
+    </root>
+
+    <!-- 특정패키지 로깅레벨 설정 -->
+    <logger name="org.apache.ibatis" level="DEBUG" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+        <appender-ref ref="Error"/>
+    </logger>
+</configuration>
+```
