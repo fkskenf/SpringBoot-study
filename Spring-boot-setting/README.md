@@ -4,6 +4,7 @@
 # Error
 > 1. java version : File > Project Structure... > Project Setting > Project > SDK 버전업
 > 2. Q Class : 트리에서 > build > generated > querydsl 삭제 > Gradle reload
+> 3. bootrun : java version 이슈
 
 # Catalog
 > 1. Project Setting
